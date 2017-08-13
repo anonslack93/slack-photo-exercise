@@ -1,0 +1,7 @@
+# General macOS ignores
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# NPM
+node_modules/
