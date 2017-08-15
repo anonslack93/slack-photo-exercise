@@ -1,11 +1,15 @@
-import flickrAPI from './api/flickrAPI';
-import flickrSearchAPI from './api/flickrSearchAPI';
+import App from './views/App';
 
-const flickrAPIClient = flickrAPI('ed4a2d49acb1d0d7c73bb8aeacc3a82c');
-const flickrSearchAPIClient = flickrSearchAPI(flickrAPIClient, {
-  extras: 'url_n,url_c'
-});
+const init = () => {
+  new App({container: document.querySelector('.app')});
+};
 
-flickrSearchAPIClient('San Francisco').then((response) => {
-  console.log(response);
-});
+if (document.readyState !== 'loading') {
+  init();
+} else {
+  const handleReady = () => {
+    document.removeEventListener('DOMContentLoaded', handleReady);
+    init();
+  };
+  document.addEventListener('DOMContentLoaded', handleReady);
+}
