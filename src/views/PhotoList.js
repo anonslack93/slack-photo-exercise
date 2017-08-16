@@ -85,5 +85,6 @@ export default class PhotoList {
 
   destroy() {
     this._element.remove();
+    this._listItems.length = 0;
   }
 }
