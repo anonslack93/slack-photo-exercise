@@ -40,12 +40,16 @@ export default class SearchForm {
   _handleSubmit(onSearch, event) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const {input} = this._elements;
 
     if (input.value.length === 0) return;
 
     onSearch(input.value);
+  }
+
+  focus() {
+    this._elements.input.focus();
   }
 
   getElement() {

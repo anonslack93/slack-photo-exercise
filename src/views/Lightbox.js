@@ -1,3 +1,5 @@
+import objectFitPolyfill from '../lib/objectFitPolyfill';
+
 export default class Lightbox {
   constructor({enableAttribute, urlAttribute}) {
     this._isVisible = false;
@@ -23,15 +25,20 @@ export default class Lightbox {
 
     wrapper.classList.add('lightbox-wrapper');
     wrapper.innerHTML = `
-      <div class='lightbox-title-bar'>
-        <h2 class='lightbox-title'></h2>
-        <button class='lightbox-close-button'>Close</button>
+      <div class='lightbox-modal'>
+        <div class='lightbox-title-bar'>
+          <h2 class='lightbox-title'></h2>
+          <button class='lightbox-close-button'>Close</button>
+        </div>
+        <img class='lightbox-image'>
+        <div class='lightbox-button-bar'>
+          <button class='lightbox-previous-button'>Previous</button>
+          <button class='lightbox-next-button'>Next</button>
+        </div>
       </div>
-      <button class='lightbox-previous-button'>Previous</button>
-      <img class='lightbox-image'>
-      <button class='lightbox-next-button'>Next</button>
     `;
 
+    this._elements.modal = wrapper.querySelector('.lightbox-modal');
     this._elements.title = wrapper.querySelector('.lightbox-title');
     this._elements.closeButton = wrapper.querySelector('.lightbox-close-button');
     this._elements.previousButton = wrapper.querySelector('.lightbox-previous-button');
@@ -62,7 +69,7 @@ export default class Lightbox {
   }
 
   _handleDocumentClick({target}) {
-    if (this._isVisible && !this._elements.wrapper.contains(target)) {
+    if (this._isVisible && !this._elements.modal.contains(target)) {
       this.hide();
     }
 
@@ -75,12 +82,23 @@ export default class Lightbox {
   }
 
   _handleDocumentKeydown(event) {
-    if (!(this._isVisible && event.key === 'Escape')) return;
+    if (!this._isVisible) return;
 
-    event.preventDefault();
-    event.stopPropagation();
+    const cancel = () => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
 
-    this.hide();
+    if (event.key === 'Escape' || event.key === 'Esc') {
+      cancel();
+      this.hide();
+    } else if (event.key === 'ArrowLeft' || event.key === 'Left') {
+      cancel();
+      this.previous();
+    } else if (event.key === 'ArrowRight' || event.key === 'Right') {
+      cancel();
+      this.next();
+    }
   }
 
   previous() {
@@ -113,6 +131,7 @@ export default class Lightbox {
     const index = this._photos.findIndex((photo) => photo.url === url);
 
     image.src = url;
+    objectFitPolyfill(image, 'contain');
     title.textContent = this._photos[index].title;
     wrapper.classList.add('lightbox-visible');
 

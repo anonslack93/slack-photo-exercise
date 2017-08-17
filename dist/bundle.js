@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -70,7 +70,26 @@
 "use strict";
 
 
-var _App = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (image, objectFitRule) {
+  if ('objectFit' in document.documentElement.style === false) {
+    (image.runtimeStyle || image.style).background = 'url("' + image.src + '") no-repeat 50%/' + (image.currentStyle ? image.currentStyle['object-fit'] : objectFitRule);
+
+    image.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'' + image.width + '\' height=\'' + image.height + '\'%3E%3C/svg%3E';
+  }
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _App = __webpack_require__(2);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -91,7 +110,7 @@ if (document.readyState !== 'loading') {
 }
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -103,23 +122,40 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _flickrAPI = __webpack_require__(2);
+var _objectFitPolyfill = __webpack_require__(0);
+
+var _objectFitPolyfill2 = _interopRequireDefault(_objectFitPolyfill);
+
+var _flickrAPI = __webpack_require__(3);
 
 var _flickrAPI2 = _interopRequireDefault(_flickrAPI);
 
-var _flickrSearchAPI = __webpack_require__(4);
+var _flickrSearchAPI = __webpack_require__(5);
 
 var _flickrSearchAPI2 = _interopRequireDefault(_flickrSearchAPI);
 
-var _SearchForm = __webpack_require__(6);
+var _flickrSearchAPIAdapter = __webpack_require__(6);
+
+var _flickrSearchAPIAdapter2 = _interopRequireDefault(_flickrSearchAPIAdapter);
+
+var _SearchForm = __webpack_require__(7);
 
 var _SearchForm2 = _interopRequireDefault(_SearchForm);
+
+var _PhotoList = __webpack_require__(9);
+
+var _PhotoList2 = _interopRequireDefault(_PhotoList);
+
+var _Lightbox = __webpack_require__(10);
+
+var _Lightbox2 = _interopRequireDefault(_Lightbox);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var FLICKR_API_KEY = 'ed4a2d49acb1d0d7c73bb8aeacc3a82c';
+var ITEMS_PER_PAGE = 30;
 
 var App = function () {
   function App(_ref) {
@@ -143,27 +179,65 @@ var App = function () {
         // image sizes. We could construct the URLs on the client, but pushing
         // this work to the server has no noticeable performance downside and
         // removes some complexity from the client code.
-        extras: 'url_n,url_c'
+        extras: 'url_n,url_z,url_c,url_b',
+
+        // For now, we're sorting by interestingness. We could expose sorting
+        // in the UI and do this dynamically.
+        sort: 'interestingness-desc',
+        per_page: ITEMS_PER_PAGE
       });
     }
   }, {
     key: '_setupSubViews',
     value: function _setupSubViews(container) {
-      var searchFormView = new _SearchForm2.default({
-        placeholderText: 'Try: San Francisco, New York, London',
+      this._searchFormView = new _SearchForm2.default({
+        placeholderText: 'Try: San Francisco, New York',
         submitText: 'Search',
         onSearch: this._handleSearch.bind(this)
       });
 
-      container.appendChild(searchFormView.getElement());
-      this._subViews.push(searchFormView);
+      container.appendChild(this._searchFormView.getElement());
+      this._subViews.push(this._searchFormView);
+      this._searchFormView.focus();
+
+      this._photoListView = new _PhotoList2.default({
+        onImageMount: this._addLightboxAttributeToImage,
+        numberOfPlaceholders: ITEMS_PER_PAGE
+      });
+
+      container.appendChild(this._photoListView.getElement());
+      this._subViews.push(this._photoListView);
+
+      this._lightboxView = new _Lightbox2.default({
+        enableAttribute: 'data-lightbox',
+        urlAttribute: 'data-lightbox-url'
+      });
+
+      document.body.appendChild(this._lightboxView.getElement());
+      this._subViews.push(this._lightboxView);
     }
   }, {
     key: '_handleSearch',
     value: function _handleSearch(text) {
-      this._flickrSearchAPIClient(text).then(function (response) {
-        console.log(response);
-      });
+      var photoData = this._flickrSearchAPIClient(text).then(_flickrSearchAPIAdapter2.default);
+
+      this._photoListView.setPhotos(photoData);
+      this._lightboxView.setPhotos(photoData.then(function (_ref2) {
+        var photos = _ref2.photos;
+        return photos.map(function (_ref3) {
+          var title = _ref3.title,
+              fullURL = _ref3.fullURL;
+          return { title: title, url: fullURL };
+        });
+      }));
+    }
+  }, {
+    key: '_addLightboxAttributeToImage',
+    value: function _addLightboxAttributeToImage(imageElement, imageData) {
+      imageElement.src = imageData.thumbnailURL;
+      imageElement.setAttribute('data-lightbox', '');
+      imageElement.setAttribute('data-lightbox-url', imageData.fullURL);
+      (0, _objectFitPolyfill2.default)(imageElement, 'cover');
     }
   }, {
     key: 'destroy',
@@ -171,6 +245,11 @@ var App = function () {
       this._subViews.forEach(function (subView) {
         return subView.destroy();
       });
+      this._subViews = null;
+      this._searchFormView = null;
+      this._photoListView = null;
+      this._lightboxView = null;
+      this._flickrSearchAPIClient = null;
     }
   }]);
 
@@ -180,7 +259,7 @@ var App = function () {
 exports.default = App;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -192,7 +271,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _getURLWithParameters = __webpack_require__(3);
+var _getURLWithParameters = __webpack_require__(4);
 
 var _getURLWithParameters2 = _interopRequireDefault(_getURLWithParameters);
 
@@ -230,7 +309,7 @@ exports.default = function (APIKey) {
 };
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -259,7 +338,7 @@ exports.default = function (baseURL) {
 };
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -271,22 +350,16 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _flickrSearchAPIAdapter = __webpack_require__(5);
-
-var _flickrSearchAPIAdapter2 = _interopRequireDefault(_flickrSearchAPIAdapter);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 exports.default = function (flickrAPIClient, options) {
   return function (text, perRequestOptions) {
     return flickrAPIClient('flickr.photos.search', _extends({
       text: text
-    }, options, perRequestOptions)).then(_flickrSearchAPIAdapter2.default);
+    }, options, perRequestOptions));
   };
 };
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -302,18 +375,18 @@ exports.default = function (APIResponse) {
       return {
         title: photo.title,
         thumbnailURL: photo.url_n,
-        fullURL: photo.url_c,
+        fullURL: photo.url_b || photo.url_c || photo.url_z,
         thumbnailHeight: photo.height_n,
         thumbnailWidth: photo.width_n,
-        fullHeight: photo.height_c,
-        fullWidth: photo.width_c
+        fullHeight: photo.height_b || photo.height_c || photo.height_z,
+        fullWidth: photo.width_b || photo.width_c || photo.width_z
       };
     })
   };
 };
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -325,7 +398,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _throttle = __webpack_require__(7);
+var _throttle = __webpack_require__(8);
 
 var _throttle2 = _interopRequireDefault(_throttle);
 
@@ -395,6 +468,11 @@ var SearchForm = function () {
       onSearch(input.value);
     }
   }, {
+    key: 'focus',
+    value: function focus() {
+      this._elements.input.focus();
+    }
+  }, {
     key: 'getElement',
     value: function getElement() {
       return this._elements.form;
@@ -414,7 +492,7 @@ var SearchForm = function () {
 exports.default = SearchForm;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -452,6 +530,367 @@ exports.default = function (fn) {
     }
   };
 };
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PhotoList = function () {
+  function PhotoList(_ref) {
+    var onImageMount = _ref.onImageMount,
+        numberOfPlaceholders = _ref.numberOfPlaceholders;
+
+    _classCallCheck(this, PhotoList);
+
+    this._onImageMount = onImageMount;
+    this._numberOfPlaceholders = numberOfPlaceholders;
+    this._listItems = [];
+
+    this._setupElements();
+  }
+
+  _createClass(PhotoList, [{
+    key: '_setupElements',
+    value: function _setupElements() {
+      this._element = document.createElement('ul');
+      this._element.classList.add('photo-list');
+    }
+  }, {
+    key: 'setPhotos',
+    value: function setPhotos(photoData) {
+      var _this = this;
+
+      this.reset();
+      this._showLoadingPlaceholders();
+
+      Promise.resolve(photoData).then(function (_ref2) {
+        var photos = _ref2.photos;
+
+        photos.forEach(function (photo, index) {
+          // If we ended up having more photos than the number of placeholder
+          // items we created, we need to build more list items and
+          // add them to the page.
+          if (index >= _this._listItems.length) {
+            var listItem = _this._createListItem();
+            _this._onImageMount(listItem.image, photo);
+
+            listItem.wrapper.classList.remove('photo-list-placeholder');
+            _this._element.appendChild(listItem.wrapper);
+            _this._listItems.push(listItem);
+          } else {
+            var _listItem = _this._listItems[index];
+            _this._onImageMount(_listItem.image, photo);
+
+            _listItem.wrapper.classList.remove('photo-list-placeholder');
+          }
+        });
+
+        // If there were more placeholder items than we ended up needing,
+        // remove the excess and delete the listItem objects.
+        if (photos.length < _this._listItems.length) {
+          var index = photos.length - 1;
+
+          while (++index < _this._listItems.length) {
+            var listItem = _this._listItems[index];
+            listItem.wrapper.remove();
+          }
+
+          // We mutate `length` to trim the array because it's faster than .slice().
+          _this._listItems.length = photos.length;
+        }
+      });
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this._element.innerHTML = '';
+      // We mutate `length` to trim the array because it's faster than .slice().
+      this._listItems.length = 0;
+    }
+  }, {
+    key: '_showLoadingPlaceholders',
+    value: function _showLoadingPlaceholders() {
+      var index = -1;
+      while (++index < this._numberOfPlaceholders) {
+        var listItem = this._createListItem();
+
+        listItem.wrapper.classList.add('photo-list-placeholder');
+        this._element.appendChild(listItem.wrapper);
+        this._listItems.push(listItem);
+      }
+    }
+  }, {
+    key: '_createListItem',
+    value: function _createListItem() {
+      var listItem = {
+        wrapper: document.createElement('li'),
+        image: document.createElement('img')
+      };
+
+      listItem.wrapper.classList.add('photo-list-item');
+      listItem.image.classList.add('photo-list-image');
+
+      listItem.wrapper.appendChild(listItem.image);
+
+      return listItem;
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement() {
+      return this._element;
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this._element.remove();
+      this._listItems.length = 0;
+    }
+  }]);
+
+  return PhotoList;
+}();
+
+exports.default = PhotoList;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _objectFitPolyfill = __webpack_require__(0);
+
+var _objectFitPolyfill2 = _interopRequireDefault(_objectFitPolyfill);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Lightbox = function () {
+  function Lightbox(_ref) {
+    var enableAttribute = _ref.enableAttribute,
+        urlAttribute = _ref.urlAttribute;
+
+    _classCallCheck(this, Lightbox);
+
+    this._isVisible = false;
+    this._currentIndex = null;
+    this._photos = [];
+
+    this._enableAttribute = enableAttribute;
+    this._urlAttribute = urlAttribute;
+
+    this._handleDocumentClick = this._handleDocumentClick.bind(this);
+    this._handleDocumentKeydown = this._handleDocumentKeydown.bind(this);
+    this.hide = this.hide.bind(this);
+    this.previous = this.previous.bind(this);
+    this.next = this.next.bind(this);
+
+    this._setupElements();
+    this._setupListeners(enableAttribute, urlAttribute);
+  }
+
+  _createClass(Lightbox, [{
+    key: '_setupElements',
+    value: function _setupElements() {
+      var wrapper = document.createElement('div');
+      this._elements = { wrapper: wrapper };
+
+      wrapper.classList.add('lightbox-wrapper');
+      wrapper.innerHTML = '\n      <div class=\'lightbox-modal\'>\n        <div class=\'lightbox-title-bar\'>\n          <h2 class=\'lightbox-title\'></h2>\n          <button class=\'lightbox-close-button\'>Close</button>\n        </div>\n        <img class=\'lightbox-image\'>\n        <div class=\'lightbox-button-bar\'>\n          <button class=\'lightbox-previous-button\'>Previous</button>\n          <button class=\'lightbox-next-button\'>Next</button>\n        </div>\n      </div>\n    ';
+
+      this._elements.modal = wrapper.querySelector('.lightbox-modal');
+      this._elements.title = wrapper.querySelector('.lightbox-title');
+      this._elements.closeButton = wrapper.querySelector('.lightbox-close-button');
+      this._elements.previousButton = wrapper.querySelector('.lightbox-previous-button');
+      this._elements.nextButton = wrapper.querySelector('.lightbox-next-button');
+      this._elements.image = wrapper.querySelector('.lightbox-image');
+    }
+  }, {
+    key: '_setupListeners',
+    value: function _setupListeners() {
+      var _elements = this._elements,
+          closeButton = _elements.closeButton,
+          previousButton = _elements.previousButton,
+          nextButton = _elements.nextButton;
+
+
+      document.addEventListener('click', this._handleDocumentClick, true);
+      document.addEventListener('keydown', this._handleDocumentKeydown, true);
+
+      closeButton.addEventListener('click', this.hide);
+      previousButton.addEventListener('click', this.previous);
+      nextButton.addEventListener('click', this.next);
+    }
+  }, {
+    key: '_destroyListeners',
+    value: function _destroyListeners() {
+      var _elements2 = this._elements,
+          closeButton = _elements2.closeButton,
+          previousButton = _elements2.previousButton,
+          nextButton = _elements2.nextButton;
+
+
+      document.removeEventListener('click', this._handleDocumentClick, true);
+      document.removeEventListener('keydown', this._handleDocumentKeydown, true);
+
+      closeButton.removeEventListener('click', this.hide);
+      previousButton.removeEventListener('click', this.previous);
+      nextButton.removeEventListener('click', this.next);
+    }
+  }, {
+    key: '_handleDocumentClick',
+    value: function _handleDocumentClick(_ref2) {
+      var target = _ref2.target;
+
+      if (this._isVisible && !this._elements.modal.contains(target)) {
+        this.hide();
+      }
+
+      if (!target.hasAttribute(this._enableAttribute)) return;
+
+      var url = target.getAttribute(this._urlAttribute);
+      if (!url) return;
+
+      this.show(url);
+    }
+  }, {
+    key: '_handleDocumentKeydown',
+    value: function _handleDocumentKeydown(event) {
+      if (!this._isVisible) return;
+
+      var cancel = function cancel() {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        cancel();
+        this.hide();
+      } else if (event.key === 'ArrowLeft' || event.key === 'Left') {
+        cancel();
+        this.previous();
+      } else if (event.key === 'ArrowRight' || event.key === 'Right') {
+        cancel();
+        this.next();
+      }
+    }
+  }, {
+    key: 'previous',
+    value: function previous() {
+      if (this._currentIndex === 0) return;
+
+      var previousIndex = this._currentIndex - 1;
+      var url = this._photos[previousIndex].url;
+
+
+      this.show(url);
+    }
+  }, {
+    key: 'next',
+    value: function next() {
+      if (this._currentIndex === this._photos.length - 1) return;
+
+      var nextIndex = this._currentIndex + 1;
+      var url = this._photos[nextIndex].url;
+
+
+      this.show(url);
+    }
+  }, {
+    key: 'setPhotos',
+    value: function setPhotos(photoData) {
+      var _this = this;
+
+      this.reset();
+      Promise.resolve(photoData).then(function (photos) {
+        _this._photos = photos;
+      });
+    }
+  }, {
+    key: 'show',
+    value: function show(url) {
+      var _elements3 = this._elements,
+          wrapper = _elements3.wrapper,
+          image = _elements3.image,
+          title = _elements3.title,
+          previousButton = _elements3.previousButton,
+          nextButton = _elements3.nextButton;
+
+      var index = this._photos.findIndex(function (photo) {
+        return photo.url === url;
+      });
+
+      image.src = url;
+      (0, _objectFitPolyfill2.default)(image, 'contain');
+      title.textContent = this._photos[index].title;
+      wrapper.classList.add('lightbox-visible');
+
+      previousButton.disabled = index === 0;
+      nextButton.disabled = index === this._photos.length - 1;
+
+      this._currentUrl = url;
+      this._currentIndex = index;
+      this._isVisible = true;
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      var _elements4 = this._elements,
+          wrapper = _elements4.wrapper,
+          image = _elements4.image,
+          title = _elements4.title;
+
+      image.src = '';
+      title.textContent = '';
+      wrapper.classList.remove('lightbox-visible');
+
+      this._currentUrl = null;
+      this._currentIndex = null;
+      this._isVisible = false;
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this._photos.length = 0;
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement() {
+      return this._elements.wrapper;
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this._elements.wrapper.remove();
+      this._destroyListeners();
+      this._elements = null;
+      this._photos = null;
+    }
+  }]);
+
+  return Lightbox;
+}();
+
+exports.default = Lightbox;
 
 /***/ })
 /******/ ]);

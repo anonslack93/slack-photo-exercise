@@ -1,3 +1,5 @@
+import objectFitPolyfill from '../lib/objectFitPolyfill';
+
 import flickrAPI from '../api/flickrAPI';
 import flickrSearchAPI from '../api/flickrSearchAPI';
 import flickrSearchAPIAdapter from '../api/flickrSearchAPIAdapter';
@@ -36,13 +38,14 @@ export default class App {
 
   _setupSubViews(container) {
     this._searchFormView = new SearchForm({
-      placeholderText: 'Try: San Francisco, New York, London',
+      placeholderText: 'Try: San Francisco, New York',
       submitText: 'Search',
       onSearch: this._handleSearch.bind(this)
     });
 
     container.appendChild(this._searchFormView.getElement());
     this._subViews.push(this._searchFormView);
+    this._searchFormView.focus();
 
     this._photoListView = new PhotoList({
       onImageMount: this._addLightboxAttributeToImage,
@@ -57,7 +60,7 @@ export default class App {
       urlAttribute: 'data-lightbox-url'
     });
 
-    container.appendChild(this._lightboxView.getElement());
+    document.body.appendChild(this._lightboxView.getElement());
     this._subViews.push(this._lightboxView);
   }
 
@@ -77,6 +80,7 @@ export default class App {
     imageElement.src = imageData.thumbnailURL;
     imageElement.setAttribute('data-lightbox', '');
     imageElement.setAttribute('data-lightbox-url', imageData.fullURL);
+    objectFitPolyfill(imageElement, 'cover');
   }
 
   destroy() {

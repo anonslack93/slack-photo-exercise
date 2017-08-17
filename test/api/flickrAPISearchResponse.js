@@ -1,0 +1,68 @@
+export default {
+  photos: {
+    total: 169925,
+    page: 1,
+    pages: 1700,
+    perpage: 100,
+    photo: [
+      {
+        'id': 17115508646,
+        'owner': '114040187@N08',
+        'secret': '49aecae924',
+        'server': 7682,
+        'farm': 8,
+        'title': 'New York, NY',
+        'ispublic': 1,
+        'isfriend': 0,
+        'isfamily': 0,
+        'url_n': 'https:\/\/farm8.staticflickr.com\/7682\/17115508646_49aecae924_n.jpg',
+        'height_n': 193,
+        'width_n': 320,
+        'url_z': 'https:\/\/farm8.staticflickr.com\/7682\/17115508646_49aecae924_z.jpg',
+        'height_z': 387,
+        'width_z': 640,
+        'url_c': 'https:\/\/farm8.staticflickr.com\/7682\/17115508646_49aecae924_c.jpg',
+        'height_c': 484,
+        'width_c': 800,
+        'url_c': 'https:\/\/farm8.staticflickr.com\/7682\/17115508646_49aecae924_b.jpg',
+        'height_b': 768,
+        'width_b': 1024,
+      }, {
+        'id': 34286001774,
+        'owner': '63848257@N06',
+        'secret': '6e53271e4b',
+        'server': 4218,
+        'farm': 5,
+        'title': 'New York 2016 - Helicopter tour',
+        'ispublic': 1,
+        'isfriend': 0,
+        'isfamily': 0,
+        'url_n': 'https:\/\/farm5.staticflickr.com\/4218\/34286001774_6e53271e4b_n.jpg',
+        'height_n': 213,
+        'width_n': 320,
+        'url_z': 'https:\/\/farm5.staticflickr.com\/4218\/34286001774_6e53271e4b_z.jpg',
+        'height_z': 427,
+        'width_z': 640,
+        'url_c': 'https:\/\/farm5.staticflickr.com\/4218\/34286001774_6e53271e4b_c.jpg',
+        'height_c': 534,
+        'width_c': 800
+      }, {
+        'id': 5818302833,
+        'owner': '57962575@N03',
+        'secret': 'b4796072ca',
+        'server': 3640,
+        'farm': 4,
+        'title': 'Manhattan Bridge Sunset',
+        'ispublic': 1,
+        'isfriend': 0,
+        'isfamily': 0,
+        'url_n': 'https:\/\/farm4.staticflickr.com\/3640\/5818302833_b4796072ca_n.jpg',
+        'height_n': 213,
+        'width_n': 320,
+        'url_z': 'https:\/\/farm4.staticflickr.com\/3640\/5818302833_b4796072ca_z.jpg',
+        'height_z': 427,
+        'width_z': 640
+      }
+    ]
+  }
+}

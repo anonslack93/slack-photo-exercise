@@ -3,7 +3,7 @@ export default (baseURL, params = {}) => {
 
   if (keys.length === 0) return baseURL;
 
-  const queryString = keys.map((key) => {
+  const queryString = keys.sort().map((key) => {
     const value = params[key];
 
     if (value === undefined || value === null) return null;

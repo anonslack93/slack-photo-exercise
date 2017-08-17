@@ -25,11 +25,14 @@ export default class PhotoList {
           const listItem = this._createListItem();
           this._onImageMount(listItem.image, photo);
 
+          listItem.wrapper.classList.remove('photo-list-placeholder');
           this._element.appendChild(listItem.wrapper);
           this._listItems.push(listItem);
         } else {
           const listItem = this._listItems[index];
           this._onImageMount(listItem.image, photo);
+
+          listItem.wrapper.classList.remove('photo-list-placeholder');
         }
       });
 
@@ -46,6 +49,11 @@ export default class PhotoList {
         // We mutate `length` to trim the array because it's faster than .slice().
         this._listItems.length = photos.length;
       }
+    }).catch((error) => {
+      console.error('PhotoList.setPhotos: ', error);
+
+      this.reset();
+      this._showFetchError();
     });
   }
 
@@ -60,9 +68,18 @@ export default class PhotoList {
     while (++index < this._numberOfPlaceholders) {
       const listItem = this._createListItem();
 
+      listItem.wrapper.classList.add('photo-list-placeholder');
       this._element.appendChild(listItem.wrapper);
       this._listItems.push(listItem);
     }
+  }
+
+  _showFetchError() {
+    this._element.innerHTML = `
+      <h2 class='photo-list-load-error'>
+        Uh-oh, it looks like something went wrong. Try searching again.
+      </h2>
+    `;
   }
 
   _createListItem() {
