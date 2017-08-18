@@ -6,6 +6,7 @@
   "scripts": {
     "test": "karma start --single-run",
     "build": "webpack --colors",
+    "build-prod": "NODE_ENV=production webpack -p --colors",
     "start": "webpack-dev-server"
   },
   "keywords": [],
