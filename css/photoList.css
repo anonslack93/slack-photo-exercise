@@ -31,7 +31,7 @@
   transition: transform 200ms ease-out;
 }
 
-.photo-list-item:not(.placeholder):hover {
+.photo-list-item:not(.photo-list-placeholder):hover {
   box-shadow: 0px 1px 10px var(--30-percent-black);
   transform: scale(1.01);
 }
@@ -46,6 +46,10 @@
   background: linear-gradient(90deg, transparent, var(--30-percent-white), transparent);
   transform: translateX(-100%);
   animation: loading 1.5s infinite;
+}
+
+.photo-list-item.photo-list-placeholder > .photo-list-image {
+  display: none;
 }
 
 .photo-list-image {

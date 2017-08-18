@@ -77,16 +77,28 @@ export default class PhotoList {
       // add them to the page.
       if (index >= this._listItems.length) {
         const listItem = this._createListItem();
+
+        const removePlaceholderClass = () => {
+          listItem.image.removeEventListener('load', removePlaceholderClass);
+          listItem.wrapper.classList.remove('photo-list-placeholder');
+        };
+
+        listItem.image.addEventListener('load', removePlaceholderClass);
         this._onImageMount(listItem.image, photo);
 
-        listItem.wrapper.classList.remove('photo-list-placeholder');
         this._element.appendChild(listItem.wrapper);
         this._listItems.push(listItem);
       } else {
         const listItem = this._listItems[index];
-        this._onImageMount(listItem.image, photo);
 
-        listItem.wrapper.classList.remove('photo-list-placeholder');
+        const removePlaceholderClass = () => {
+          listItem.image.removeEventListener('load', removePlaceholderClass);
+          listItem.wrapper.classList.remove('photo-list-placeholder');
+        };
+
+        listItem.image.addEventListener('load', removePlaceholderClass);
+
+        this._onImageMount(listItem.image, photo);
       }
     });
 
