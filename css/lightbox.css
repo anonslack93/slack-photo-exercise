@@ -1,11 +1,6 @@
 @import './colors.css';
 @import './button.css';
 
-@values darker-grey,
-        light-grey,
-        30-percent-black,
-        40-percent-black from './colors.css';
-
 @keyframes modal-enter {
   0% {
     opacity: 0;
@@ -72,7 +67,7 @@
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
-  color: darker-grey;
+  color: var(--darker-grey);
 }
 
 .lightbox-wrapper {
@@ -89,7 +84,7 @@
   bottom: 0;
   left: 0;
   z-index: 50;
-  background-color: 30-percent-black;
+  background-color: var(--30-percent-black);
 }
 
 .lightbox-modal {
@@ -100,9 +95,9 @@
   width: 75%;
   max-height: 35rem;
   max-width: 50rem;
-  box-shadow: 0px 10px 40px 40-percent-black;
+  box-shadow: 0px 10px 40px var(--40-percent-black);
   background-color: white;
-  border: 1px solid light-grey;
+  border: 1px solid var(--light-grey);
   border-radius: 0.5rem;
 }
 

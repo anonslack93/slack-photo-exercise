@@ -1,20 +1,18 @@
 @import './colors.css';
 
-@values dark-grey, light-blue, subdued-blue from './colors.css';
-
 %base {
   font-size: 0.9rem;
-  color: dark-grey;
+  color: var(--dark-grey);
   background-color: transparent;
   border: none;
   outline: none;
 }
 
 %enabled {
-  color: light-blue;
+  color: var(--light-blue);
   cursor: pointer;
 }
 
 %hover {
-  color: subdued-blue;
+  color: var(--subdued-blue);
 }

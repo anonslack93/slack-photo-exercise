@@ -1,8 +1,6 @@
 @import './colors.css';
 @import './button.css';
 
-@values darker-grey, light-grey, dark-grey from './colors.css';
-
 .search-form {
   display: flex;
   justify-content: center;
@@ -10,18 +8,18 @@
 
 .search-input {
   font-size: 0.8rem;
-  color: darker-grey;
+  color: var(--darker-grey);
   width: 15rem;
   height: 2.5rem;
   padding: 0 1rem;
-  border: 1px solid light-grey;
+  border: 1px solid var(--light-grey);
   border-radius: 0.5rem;
   outline: none;
 }
 
 .search-input:hover,
 .search-input:focus {
-  border-color: dark-grey;
+  border-color: var(--dark-grey);
 }
 
 .search-submit-btn {

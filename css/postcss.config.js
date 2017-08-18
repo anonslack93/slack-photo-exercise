@@ -1,8 +1,8 @@
 module.exports = () => {
   return {
     plugins: [
-      require('postcss-icss-values'),
       require('postcss-import'),
+      require('postcss-custom-properties'),
       require('postcss-extend')
     ]
   };
