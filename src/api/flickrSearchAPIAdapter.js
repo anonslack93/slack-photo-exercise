@@ -1,5 +1,8 @@
 export default (APIResponse) => {
   return {
+    page: APIResponse.photos.page,
+    pages: APIResponse.photos.pages,
+    perPage: APIResponse.photos.perpage,
     photos: APIResponse.photos.photo.map((photo) => ({
       title: photo.title,
       thumbnailURL: photo.url_n,

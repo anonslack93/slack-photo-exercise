@@ -1,0 +1,18 @@
+@value almost-white from './colors.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: almost-white;
+  margin: 0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  max-width: 72rem;
+  margin: 3rem auto 0;
+}

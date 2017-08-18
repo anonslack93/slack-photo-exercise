@@ -1,0 +1,112 @@
+@import './colors.css';
+@import './button.css';
+
+@values darker-grey,
+        light-grey,
+        30-percent-black,
+        40-percent-black from './colors.css';
+
+@keyframes modal-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-15rem);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lightbox-close-button {
+  @extend %base;
+  @extend %enabled;
+  margin-left: auto;
+  width: 6rem;
+  text-align: right;
+}
+
+.lightbox-previous-button {
+  @extend %base;
+  text-align: left;
+}
+
+.lightbox-next-button {
+  @extend %base;
+  margin-left: auto;
+  text-align: right;
+}
+
+.lightbox-previous-button:not([disabled]),
+.lightbox-next-button:not([disabled]) {
+  @extend %enabled;
+}
+
+.lightbox-close-button:hover,
+.lightbox-previous-button:not([disabled]):hover,
+.lightbox-next-button:not([disabled]):hover {
+  @extend %hover;
+}
+
+.lightbox-previous-button,
+.lightbox-next-button {
+  width: 8rem;
+}
+
+.lightbox-image {
+  height: calc(100% - 8rem);
+  margin: 0 1rem;
+  object-fit: contain;
+}
+
+.lightbox-title-bar,
+.lightbox-button-bar {
+  display: flex;
+  min-height: 4rem;
+  padding: 0 1rem;
+}
+
+.lightbox-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  color: darker-grey;
+}
+
+.lightbox-wrapper {
+  display: none;
+}
+
+.lightbox-wrapper.lightbox-visible {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  background-color: 30-percent-black;
+}
+
+.lightbox-modal {
+  display: flex;
+  opacity: 0;
+  flex-direction: column;
+  height: 75%;
+  width: 75%;
+  max-height: 35rem;
+  max-width: 50rem;
+  box-shadow: 0px 10px 40px 40-percent-black;
+  background-color: white;
+  border: 1px solid light-grey;
+  border-radius: 0.5rem;
+}
+
+.lightbox-wrapper.lightbox-visible > .lightbox-modal {
+  opacity: 1;
+  animation: 300ms ease-out 0s modal-enter;
+}

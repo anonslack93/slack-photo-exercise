@@ -1,3 +1,5 @@
+import '../css/main.css';
+
 import App from './views/App';
 
 const init = () => {

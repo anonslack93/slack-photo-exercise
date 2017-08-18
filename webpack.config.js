@@ -1,4 +1,5 @@
 const path = require('path');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -22,7 +23,18 @@ module.exports = {
             plugins: ['transform-object-rest-spread']
           }
         }
+      }, {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {loader: 'css-loader', options: {importLoaders: 1}},
+            'postcss-loader'
+          ]
+        })
       }
     ]
-  }
+  },
+  plugins: [
+    new ExtractTextPlugin('style.css')
+  ]
 };

@@ -126,6 +126,12 @@ export default class Lightbox {
     });
   }
 
+  addPhotos(photoData) {
+    Promise.resolve(photoData).then((photos) => {
+      this._photos = this._photos.concat(photos);
+    });
+  }
+
   show(url) {
     const {wrapper, image, title, previousButton, nextButton} = this._elements;
     const index = this._photos.findIndex((photo) => photo.url === url);

@@ -1,0 +1,20 @@
+@import './colors.css';
+
+@values dark-grey, light-blue, subdued-blue from './colors.css';
+
+%base {
+  font-size: 0.9rem;
+  color: dark-grey;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+%enabled {
+  color: light-blue;
+  cursor: pointer;
+}
+
+%hover {
+  color: subdued-blue;
+}

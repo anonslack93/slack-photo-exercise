@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -89,7 +89,49 @@ exports.default = function (image, objectFitRule) {
 "use strict";
 
 
-var _App = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (fn) {
+  var timeWindow = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
+  var context = arguments[2];
+
+  var lastCallTime = void 0;
+  var pendingCall = void 0;
+
+  return function () {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var now = +new Date();
+    var fnContext = context || this;
+    var nextCallTime = lastCallTime + timeWindow;
+
+    if (lastCallTime && now < nextCallTime) {
+      clearTimeout(pendingCall);
+      pendingCall = setTimeout(function () {
+        lastCallTime = now;
+        fn.apply(fnContext, args);
+      }, timeWindow);
+    } else {
+      lastCallTime = now;
+      fn.apply(fnContext, args);
+    }
+  };
+};
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(3);
+
+var _App = __webpack_require__(4);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -110,7 +152,14 @@ if (document.readyState !== 'loading') {
 }
 
 /***/ }),
-/* 2 */
+/* 3 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+module.exports = {"almost-white":"rgb(250, 250, 250)","lighter-grey":"rgb(240, 240, 240)","light-grey":"rgb(160, 160, 162)","dark-grey":"rgb(113, 114, 116)","darker-grey":"rgb(85, 84, 89)","alert-red":"rgb(255, 135, 109)","light-blue":"rgb(41, 178, 238)","subdued-blue":"rgb(61, 156, 212)","20-percent-black":"rgba(0, 0, 0, 0.2)","30-percent-black":"rgba(0, 0, 0, 0.3)","40-percent-black":"rgba(0, 0, 0, 0.4)","30-percent-white":"rgba(255, 255, 255, 0.3)"};
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -126,27 +175,27 @@ var _objectFitPolyfill = __webpack_require__(0);
 
 var _objectFitPolyfill2 = _interopRequireDefault(_objectFitPolyfill);
 
-var _flickrAPI = __webpack_require__(3);
+var _flickrAPI = __webpack_require__(5);
 
 var _flickrAPI2 = _interopRequireDefault(_flickrAPI);
 
-var _flickrSearchAPI = __webpack_require__(5);
+var _flickrSearchAPI = __webpack_require__(7);
 
 var _flickrSearchAPI2 = _interopRequireDefault(_flickrSearchAPI);
 
-var _flickrSearchAPIAdapter = __webpack_require__(6);
+var _flickrSearchAPIAdapter = __webpack_require__(8);
 
 var _flickrSearchAPIAdapter2 = _interopRequireDefault(_flickrSearchAPIAdapter);
 
-var _SearchForm = __webpack_require__(7);
+var _SearchForm = __webpack_require__(9);
 
 var _SearchForm2 = _interopRequireDefault(_SearchForm);
 
-var _PhotoList = __webpack_require__(9);
+var _PhotoList = __webpack_require__(10);
 
 var _PhotoList2 = _interopRequireDefault(_PhotoList);
 
-var _Lightbox = __webpack_require__(10);
+var _Lightbox = __webpack_require__(11);
 
 var _Lightbox2 = _interopRequireDefault(_Lightbox);
 
@@ -219,17 +268,32 @@ var App = function () {
   }, {
     key: '_handleSearch',
     value: function _handleSearch(text) {
-      var photoData = this._flickrSearchAPIClient(text).then(_flickrSearchAPIAdapter2.default);
+      var _this = this;
 
-      this._photoListView.setPhotos(photoData);
-      this._lightboxView.setPhotos(photoData.then(function (_ref2) {
-        var photos = _ref2.photos;
-        return photos.map(function (_ref3) {
-          var title = _ref3.title,
-              fullURL = _ref3.fullURL;
-          return { title: title, url: fullURL };
+      var flickrToLightboxList = function flickrToLightboxList(_ref2) {
+        var title = _ref2.title,
+            fullURL = _ref2.fullURL;
+        return { title: title, url: fullURL };
+      };
+
+      this._photoListView.setPhotos(function (page) {
+        var photoData = _this._flickrSearchAPIClient(text, { page: page }).then(_flickrSearchAPIAdapter2.default);
+
+        var lightboxData = photoData.then(function (_ref3) {
+          var photos = _ref3.photos;
+          return photos.map(flickrToLightboxList);
         });
-      }));
+
+        if (page === 1) {
+          _this._lightboxView.setPhotos(lightboxData);
+        } else {
+          // The Lightbox view needs to know about additional pages so it can
+          // handle previous/next behavior.
+          _this._lightboxView.addPhotos(lightboxData);
+        }
+
+        return photoData;
+      });
     }
   }, {
     key: '_addLightboxAttributeToImage',
@@ -259,7 +323,7 @@ var App = function () {
 exports.default = App;
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -271,7 +335,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _getURLWithParameters = __webpack_require__(4);
+var _getURLWithParameters = __webpack_require__(6);
 
 var _getURLWithParameters2 = _interopRequireDefault(_getURLWithParameters);
 
@@ -309,7 +373,7 @@ exports.default = function (APIKey) {
 };
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -326,7 +390,7 @@ exports.default = function (baseURL) {
 
   if (keys.length === 0) return baseURL;
 
-  var queryString = keys.map(function (key) {
+  var queryString = keys.sort().map(function (key) {
     var value = params[key];
 
     if (value === undefined || value === null) return null;
@@ -338,7 +402,7 @@ exports.default = function (baseURL) {
 };
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -359,7 +423,7 @@ exports.default = function (flickrAPIClient, options) {
 };
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -371,6 +435,9 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function (APIResponse) {
   return {
+    page: APIResponse.photos.page,
+    pages: APIResponse.photos.pages,
+    perPage: APIResponse.photos.perpage,
     photos: APIResponse.photos.photo.map(function (photo) {
       return {
         title: photo.title,
@@ -386,7 +453,7 @@ exports.default = function (APIResponse) {
 };
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -398,7 +465,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _throttle = __webpack_require__(8);
+var _throttle = __webpack_require__(1);
 
 var _throttle2 = _interopRequireDefault(_throttle);
 
@@ -492,47 +559,7 @@ var SearchForm = function () {
 exports.default = SearchForm;
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (fn) {
-  var timeWindow = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
-  var context = arguments[2];
-
-  var lastCallTime = void 0;
-  var pendingCall = void 0;
-
-  return function () {
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    var now = +new Date();
-    var fnContext = context || this;
-    var nextCallTime = lastCallTime + timeWindow;
-
-    if (lastCallTime && now < nextCallTime) {
-      clearTimeout(pendingCall);
-      pendingCall = setTimeout(function () {
-        lastCallTime = now;
-        fn.apply(fnContext, args);
-      }, timeWindow);
-    } else {
-      lastCallTime = now;
-      fn.apply(fnContext, args);
-    }
-  };
-};
-
-/***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -544,7 +571,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _throttle = __webpack_require__(1);
+
+var _throttle2 = _interopRequireDefault(_throttle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SCROLL_DISTANCE = 150;
 
 var PhotoList = function () {
   function PhotoList(_ref) {
@@ -553,9 +588,17 @@ var PhotoList = function () {
 
     _classCallCheck(this, PhotoList);
 
+    this._pages = null;
+    this._perPage = null;
+    this._currentPage = null;
+    this._isLoading = false;
+    this._getData = null;
+
     this._onImageMount = onImageMount;
     this._numberOfPlaceholders = numberOfPlaceholders;
     this._listItems = [];
+
+    this._handleDocumentScroll = (0, _throttle2.default)(this._handleDocumentScroll, 500, this);
 
     this._setupElements();
   }
@@ -574,49 +617,93 @@ var PhotoList = function () {
       this.reset();
       this._showLoadingPlaceholders();
 
-      Promise.resolve(photoData).then(function (_ref2) {
-        var photos = _ref2.photos;
+      // This allows us to accept either a function which returns a Promise
+      // or an instance of a Promise.
+      this._getData = typeof photoData === 'function' ? photoData : function () {
+        return photoData;
+      };
+      this._currentPage = 1;
+      this._isLoading = true;
 
-        photos.forEach(function (photo, index) {
-          // If we ended up having more photos than the number of placeholder
-          // items we created, we need to build more list items and
-          // add them to the page.
-          if (index >= _this._listItems.length) {
-            var listItem = _this._createListItem();
-            _this._onImageMount(listItem.image, photo);
+      Promise.resolve(this._getData(this._currentPage)).then(function (_ref2) {
+        var photos = _ref2.photos,
+            pages = _ref2.pages,
+            perPage = _ref2.perPage;
 
-            listItem.wrapper.classList.remove('photo-list-placeholder');
-            _this._element.appendChild(listItem.wrapper);
-            _this._listItems.push(listItem);
-          } else {
-            var _listItem = _this._listItems[index];
-            _this._onImageMount(_listItem.image, photo);
+        _this._isLoading = false;
+        _this._pages = pages;
+        _this._perPage = perPage;
+        _this._processNewPhotos(photos);
+        _this._setupScrollListener();
+      }).catch(function (error) {
+        console.error('PhotoList.setPhotos: ', error);
 
-            _listItem.wrapper.classList.remove('photo-list-placeholder');
-          }
-        });
-
-        // If there were more placeholder items than we ended up needing,
-        // remove the excess and delete the listItem objects.
-        if (photos.length < _this._listItems.length) {
-          var index = photos.length - 1;
-
-          while (++index < _this._listItems.length) {
-            var listItem = _this._listItems[index];
-            listItem.wrapper.remove();
-          }
-
-          // We mutate `length` to trim the array because it's faster than .slice().
-          _this._listItems.length = photos.length;
-        }
+        _this.reset();
+        _this._showFetchError();
       });
     }
   }, {
     key: 'reset',
     value: function reset() {
+      this._destroyScrollListener();
       this._element.innerHTML = '';
       // We mutate `length` to trim the array because it's faster than .slice().
       this._listItems.length = 0;
+    }
+  }, {
+    key: '_setupScrollListener',
+    value: function _setupScrollListener() {
+      document.addEventListener('scroll', this._handleDocumentScroll);
+    }
+  }, {
+    key: '_destroyScrollListener',
+    value: function _destroyScrollListener() {
+      document.removeEventListener('scroll', this._handleDocumentScroll);
+    }
+  }, {
+    key: '_processNewPhotos',
+    value: function _processNewPhotos(photos) {
+      var _this2 = this;
+
+      // We need to keep track of how many items are already listed because
+      // we don't hold onto data from previous pages (photos.length will
+      // only give us the length of the current page).
+      var offset = (this._currentPage - 1) * this._perPage;
+
+      photos.forEach(function (photo, pageIndex) {
+        var index = pageIndex + offset;
+
+        // If we ended up having more photos than the number of placeholder
+        // items we created, we need to build more list items and
+        // add them to the page.
+        if (index >= _this2._listItems.length) {
+          var listItem = _this2._createListItem();
+          _this2._onImageMount(listItem.image, photo);
+
+          listItem.wrapper.classList.remove('photo-list-placeholder');
+          _this2._element.appendChild(listItem.wrapper);
+          _this2._listItems.push(listItem);
+        } else {
+          var _listItem = _this2._listItems[index];
+          _this2._onImageMount(_listItem.image, photo);
+
+          _listItem.wrapper.classList.remove('photo-list-placeholder');
+        }
+      });
+
+      // If there were more placeholder items than we ended up needing,
+      // remove the excess and delete the listItem objects.
+      if (photos.length + offset < this._listItems.length) {
+        var index = photos.length + offset - 1;
+
+        while (++index < this._listItems.length) {
+          var listItem = this._listItems[index];
+          listItem.wrapper.remove();
+        }
+
+        // We mutate `length` to trim the array because it's faster than .slice().
+        this._listItems.length = photos.length + offset;
+      }
     }
   }, {
     key: '_showLoadingPlaceholders',
@@ -629,6 +716,11 @@ var PhotoList = function () {
         this._element.appendChild(listItem.wrapper);
         this._listItems.push(listItem);
       }
+    }
+  }, {
+    key: '_showFetchError',
+    value: function _showFetchError() {
+      this._element.innerHTML = '\n      <h2 class=\'photo-list-load-error\'>\n        Uh-oh, it looks like something went wrong. Try searching again.\n      </h2>\n    ';
     }
   }, {
     key: '_createListItem',
@@ -646,6 +738,38 @@ var PhotoList = function () {
       return listItem;
     }
   }, {
+    key: '_handleDocumentScroll',
+    value: function _handleDocumentScroll(event) {
+      var _this3 = this;
+
+      var scrollPosition = window.pageYOffset;
+      var windowSize = window.innerHeight;
+      var bodyHeight = document.body.offsetHeight;
+      var distanceFromEnd = Math.max(bodyHeight - (scrollPosition + windowSize), 0);
+
+      if (distanceFromEnd < SCROLL_DISTANCE && this._currentPage < this._pages && !this._isLoading) {
+        this._isLoading = true;
+        this._showLoadingPlaceholders();
+
+        Promise.resolve(this._getData(this._currentPage + 1)).then(function (_ref3) {
+          var photos = _ref3.photos,
+              pages = _ref3.pages;
+
+          // In case the API returns a potentially-inaccurate total page estimate.
+          _this3._isLoading = false;
+          _this3._pages = pages;
+          _this3._currentPage++;
+
+          _this3._processNewPhotos(photos);
+        }).catch(function (error) {
+          console.error('PhotoList.setPhotos: ', error);
+
+          _this3.reset();
+          _this3._showFetchError();
+        });
+      }
+    }
+  }, {
     key: 'getElement',
     value: function getElement() {
       return this._element;
@@ -653,8 +777,10 @@ var PhotoList = function () {
   }, {
     key: 'destroy',
     value: function destroy() {
+      this.reset();
       this._element.remove();
-      this._listItems.length = 0;
+      this._getData = null;
+      this._onImageMount = null;
     }
   }]);
 
@@ -664,7 +790,7 @@ var PhotoList = function () {
 exports.default = PhotoList;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -823,6 +949,15 @@ var Lightbox = function () {
       this.reset();
       Promise.resolve(photoData).then(function (photos) {
         _this._photos = photos;
+      });
+    }
+  }, {
+    key: 'addPhotos',
+    value: function addPhotos(photoData) {
+      var _this2 = this;
+
+      Promise.resolve(photoData).then(function (photos) {
+        _this2._photos = _this2._photos.concat(photos);
       });
     }
   }, {

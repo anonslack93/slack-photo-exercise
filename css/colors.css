@@ -1,0 +1,17 @@
+@value almost-white: rgb(250, 250, 250);
+
+@value lighter-grey: rgb(240, 240, 240);
+@value light-grey: rgb(160, 160, 162);
+@value dark-grey: rgb(113, 114, 116);
+@value darker-grey: rgb(85, 84, 89);
+
+@value alert-red: rgb(255, 135, 109);
+
+@value light-blue: rgb(41, 178, 238);
+@value subdued-blue: rgb(61, 156, 212);
+
+@value 20-percent-black: rgba(0, 0, 0, 0.2);
+@value 30-percent-black: rgba(0, 0, 0, 0.3);
+@value 40-percent-black: rgba(0, 0, 0, 0.4);
+
+@value 30-percent-white: rgba(255, 255, 255, 0.3);

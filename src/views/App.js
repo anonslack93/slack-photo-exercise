@@ -65,15 +65,26 @@ export default class App {
   }
 
   _handleSearch(text) {
-    const photoData = this._flickrSearchAPIClient(text)
-      .then(flickrSearchAPIAdapter);
+    const flickrToLightboxList = ({title, fullURL}) => ({title, url: fullURL});
 
-    this._photoListView.setPhotos(photoData);
-    this._lightboxView.setPhotos(
-      photoData.then(({photos}) => (
-        photos.map(({title, fullURL}) => ({title, url: fullURL}))
-      ))
-    );
+    this._photoListView.setPhotos((page) => {
+      const photoData = this._flickrSearchAPIClient(text, {page})
+        .then(flickrSearchAPIAdapter);
+
+      const lightboxData = photoData.then(({photos}) => (
+        photos.map(flickrToLightboxList)
+      ));
+
+      if (page === 1) {
+        this._lightboxView.setPhotos(lightboxData);
+      } else {
+        // The Lightbox view needs to know about additional pages so it can
+        // handle previous/next behavior.
+        this._lightboxView.addPhotos(lightboxData);
+      }
+
+      return photoData;
+    });
   }
 
   _addLightboxAttributeToImage(imageElement, imageData) {
