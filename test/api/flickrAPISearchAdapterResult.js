@@ -1,4 +1,7 @@
 export default {
+  page: 1,
+  pages: 1700,
+  perPage: 100,
   photos: [
     {
       title: 'New York, NY',
